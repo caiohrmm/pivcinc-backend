@@ -6,6 +6,7 @@ const User = require("../model/User");
 const jwt = require("jsonwebtoken");
 
 const bcrypt = require("bcrypt");
+const exceptionMessage = require("../helper/exceptions-messages");
 
 module.exports = class UserController {
   static async register(req, res) {
@@ -68,9 +69,7 @@ module.exports = class UserController {
       const newUser = await user.save();
       await createUserToken(newUser, req, res);
     } catch (error) {
-      res.status(500).json({
-        message: error,
-      });
+      exceptionMessage(res, 500, error);
     }
   }
 
@@ -110,9 +109,7 @@ module.exports = class UserController {
     try {
       await createUserToken(user, req, res);
     } catch (error) {
-      res.status(500).json({
-        message: error,
-      });
+      exceptionMessage(res, 500, error)
     }
   }
 
@@ -128,7 +125,7 @@ module.exports = class UserController {
 
       currentUser = await User.findById({ _id: decoded.id });
 
-      currentUser.password = undefined
+      currentUser.password = undefined;
     } else {
       currentUser = null;
     }
@@ -137,27 +134,23 @@ module.exports = class UserController {
   }
 
   static async getUserById(req, res) {
+    const id = req.params.id;
 
-    const id = req.params.id
-
-    const user = await User.findById(id).select("-password")
-
+    const user = await User.findById(id).select("-password");
 
     if (!user) {
-      responseError(null, req, "Usuário não encontrado!")
-      return
+      responseError(null, req, "Usuário não encontrado!");
+      return;
     }
 
-    res.status(200).send(user)
+    res.status(200).send(user);
   }
 
   static async editUserById(req, res) {
-    const id = req.params.id
+    const id = req.params.id;
 
     res.status(200).json({
-      mensagemparacorno: "Req para corno"
-    })
-
-    
+      mensagemparacorno: "Req para corno",
+    });
   }
 };
