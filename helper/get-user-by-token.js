@@ -14,7 +14,7 @@ const getUserByToken = async (token) => {
 
   const _id = decoded.id;
 
-  const user = User.findOne({ _id }).select('-password');
+  const user = await User.findOne({ _id }).select('-password');
 
   return user;
 };
