@@ -94,9 +94,9 @@ module.exports = class PostController {
     try {
       const id = req.params.id;
 
-      if (!isValidObjectId(id)) { 
+      if (!isValidObjectId(id)) {
         exceptionMessage(res, 422, "ID Inválido!");
-        return
+        return;
       }
 
       const post = await Post.findById(id);
@@ -109,6 +109,122 @@ module.exports = class PostController {
       }
     } catch (error) {
       exceptionMessage(res, 422, "ID de postagem inválido!");
+    }
+  }
+
+  static async deletePostById(req, res) {
+    const id = req.params.id;
+
+    // Verifica se existe esse ID no banco.
+    if (!isValidObjectId(id)) {
+      exceptionMessage(res, 422, "ID Inválido!");
+      return;
+    }
+
+    // Checkar se existe uma postagem no id
+    const post = await Post.findById(id);
+
+    if (!post) {
+      res.status(404).json({
+        message: "Não existe nenhuma postagem cadastrada com esse ID!!",
+      });
+      return;
+    }
+
+    // Checkar se o usuario que está logado registrou o post
+    const user = await getUserByToken(getToken(req));
+
+    // Fazer uma comparacao se o id do usuario está cadastrado no subdocument da post.
+    if (user._id.toString() !== post.userId.toString()) {
+      exceptionMessage(
+        res,
+        422,
+        "Houve um problema para processar a remoção. Tente novamente!"
+      );
+      return;
+    }
+
+    try {
+      await Post.findByIdAndDelete(id);
+      res.status(200).json({
+        message: `A postagem ${post.title} foi removido com sucesso!`,
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  static async updatePostById(req, res) {
+    // Funcao que irá atualizar a postagem baseada no id
+    const id = req.params.id;
+
+    // Verifica se existe esse ID no banco.
+    if (!isValidObjectId(id)) {
+      exceptionMessage(res, 422, "ID Inválido!");
+      return;
+    }
+
+    const { title, description, categories } = req.body;
+
+    const images = req.files;
+
+    const updatedData = {};
+
+    const post = await Post.findById(id);
+
+    if (!post) {
+      res.status(404).json({
+        message: "Postagem não encontrada!",
+      });
+    }
+
+    const user = await getUserByToken(getToken(req));
+
+    if (user._id.toString() !== post.userId.toString()) {
+      exceptionMessage(
+        res,
+        422,
+        "Houve um problema para processar a edição. Tente novamente!"
+      );
+      return;
+    }
+
+    if (!title) {
+      exceptionMessage(res, 422, "O título é obrigatório!");
+      return;
+    } else {
+      updatedData.title = title;
+    }
+
+    if (!description) {
+      exceptionMessage(res, 422, "O título é obrigatório!");
+      return;
+    } else {
+      updatedData.description = description;
+    }
+
+    if (!categories || !Array.isArray(categories) || categories.length === 0) {
+      exceptionMessage(res, 422, "As categorias são obrigatórias e devem ser fornecidas como um array não vazio!");
+      return;
+    } else {
+      updatedData.categories = categories;
+    }
+
+    if (images.length > 0) {
+      updatedData.images = [];
+      images.map((image) => {
+        updatedData.images.push(image.filename);
+      });
+    }
+
+    // Se passar por todas as validações ele atualiza o post
+    try {
+      await Post.findByIdAndUpdate(id, updatedData);
+      res
+        .status(200)
+        .json({ message: `A postagem foi atualizada com sucesso.` });
+    } catch (error) {
+      console.log(error);
     }
   }
 };
