@@ -231,7 +231,7 @@ module.exports = class PostController {
     }
   }
 
-  static async likePost(req, res) {
+  static async likePostById(req, res) {
     try {
       const user = await getUserByToken(getToken(req));
 
@@ -251,7 +251,6 @@ module.exports = class PostController {
 
       // Verifique se o usuário já curtiu o post
       if (post.likes.includes(user._id)) {
-        
         // Se o usuário já curtiu, remova a curtida
         post.likes.pull(user._id);
       } else {
@@ -266,6 +265,39 @@ module.exports = class PostController {
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: "Ocorreu um erro ao curtir o post" });
+    }
+  }
+
+  static async commentToPostById(req, res) {
+    try {
+      const { text } = req.body;
+      const postId = req.params.id;
+
+      if (!isValidObjectId(postId)) {
+        exceptionMessage(res, 422, "ID Inválido!");
+        return;
+      }
+      const post = await Post.findById(postId);
+      const user = await getUserByToken(getToken(req))
+
+      if (!post) {
+        return res.status(404).json({ message: "Post não encontrado" });
+      }
+
+      // Adicione o comentário à postagem
+      post.comments.push({ userId: user._id, username: user.name, text });
+
+      // Salve as alterações
+      await post.save();
+
+      res
+        .status(201)
+        .json({ message: "Comentário adicionado com sucesso", post });
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .json({ message: "Ocorreu um erro ao adicionar o comentário" });
     }
   }
 };

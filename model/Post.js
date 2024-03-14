@@ -1,6 +1,13 @@
 const mongoose = require("../db/connection");
 const { Schema } = mongoose;
 
+const commentSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  username: { type: String, required: true }, // Adicionando o campo username
+  text: { type: String, required: true },
+  date: { type: Date, default: Date.now },
+});
+
 const Post = mongoose.model(
   "Post",
   new Schema(
@@ -12,13 +19,7 @@ const Post = mongoose.model(
       images: [{ type: Array }],
       categories: [{ type: String }],
       likes: [{ type: Schema.Types.ObjectId, ref: "User" }],
-      comments: [
-        {
-          user: { type: Schema.Types.ObjectId, ref: "User" },
-          text: { type: String, required: true },
-          date: { type: Date, default: Date.now },
-        },
-      ],
+      comments: [commentSchema],
     },
     { timestamps: true }
   )
