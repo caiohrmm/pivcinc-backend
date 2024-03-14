@@ -17,8 +17,9 @@ router.get("/", PostController.getAllPosts);
 router.get("/myposts/:id", checkToken, PostController.getAllUserPosts);
 router.get("/:id", checkToken, PostController.getPostById);
 router.delete("/deletePostById/:id", checkToken, PostController.deletePostById);
-
 router.patch('/edit/:id', checkToken, imageUpload.array('images'), PostController.updatePostById)
+router.post('/likepost/:id', checkToken, PostController.likePost)
+
 
 
 module.exports = router;

@@ -173,9 +173,8 @@ module.exports = class PostController {
     const post = await Post.findById(id);
 
     if (!post) {
-      res.status(404).json({
-        message: "Postagem não encontrada!",
-      });
+      exceptionMessage(res, 404, "Postagem não encontrada!");
+      return;
     }
 
     const user = await getUserByToken(getToken(req));
@@ -204,7 +203,11 @@ module.exports = class PostController {
     }
 
     if (!categories || !Array.isArray(categories) || categories.length === 0) {
-      exceptionMessage(res, 422, "As categorias são obrigatórias e devem ser fornecidas como um array não vazio!");
+      exceptionMessage(
+        res,
+        422,
+        "As categorias são obrigatórias e devem ser fornecidas como um array não vazio!"
+      );
       return;
     } else {
       updatedData.categories = categories;
@@ -225,6 +228,44 @@ module.exports = class PostController {
         .json({ message: `A postagem foi atualizada com sucesso.` });
     } catch (error) {
       console.log(error);
+    }
+  }
+
+  static async likePost(req, res) {
+    try {
+      const user = await getUserByToken(getToken(req));
+
+      const postId = req.params.id;
+
+      if (!isValidObjectId(postId)) {
+        exceptionMessage(res, 422, "ID Inválido!");
+        return;
+      }
+
+      const post = await Post.findById(postId);
+
+      if (!post) {
+        exceptionMessage(res, 404, "Postagem não encontrada!");
+        return;
+      }
+
+      // Verifique se o usuário já curtiu o post
+      if (post.likes.includes(user._id)) {
+        
+        // Se o usuário já curtiu, remova a curtida
+        post.likes.pull(user._id);
+      } else {
+        // Caso contrário, adicione a curtida
+        post.likes.push(user._id);
+      }
+
+      // Salve as alterações
+      await post.save();
+
+      res.status(200).json({ message: "Curtida atualizada com sucesso", post });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Ocorreu um erro ao curtir o post" });
     }
   }
 };
