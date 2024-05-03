@@ -264,7 +264,7 @@ module.exports = class PostController {
       res.status(200).json({ message: "Curtida atualizada com sucesso", post });
     } catch (error) {
       console.error(error);
-      res.status(500).json({ message: "Ocorreu um erro ao curtir o post" });
+      exceptionMessage(res, 422, "Ocorreu um erro ao curtir o post!");
     }
   }
 
@@ -278,10 +278,11 @@ module.exports = class PostController {
         return;
       }
       const post = await Post.findById(postId);
-      const user = await getUserByToken(getToken(req))
+      const user = await getUserByToken(getToken(req));
 
       if (!post) {
-        return res.status(404).json({ message: "Post não encontrado" });
+        exceptionMessage(res, 404, "Postagem não encontrada!");
+        return;
       }
 
       // Adicione o comentário à postagem
@@ -295,9 +296,62 @@ module.exports = class PostController {
         .json({ message: "Comentário adicionado com sucesso", post });
     } catch (error) {
       console.error(error);
+      exceptionMessage(res, 422, "Ocorreu um erro ao atualizar o comentário!");
+    }
+  }
+
+  static async updateComment(req, res) {
+    try {
+
+      // Recuperando o id da postagem do parametro da requisicao
+      const postId = req.params.postId;
+
+      // Recuperando o id do comentario do parametro da requisicao
+      const commentId = req.params.commentId;
+
+      // Recuperando o texto do comentario do body da requisição
+      const { text } = req.body;
+      const post = await Post.findById(postId);
+      const user = await getUserByToken(getToken(req));
+
+      if (!isValidObjectId(postId)) {
+        exceptionMessage(res, 422, "ID Inválido!");
+        return;
+      }
+
+      if (!post) {
+        exceptionMessage(res, 404, "Postagem não encontrada!");
+        return;
+      }
+
+      const comment = post.comments._id(commentId);
+      // Verifique se o post contém o comentário
+      if (!comment) {
+        exceptionMessage(res, 404, "Comentário não encontrado!");
+        return;
+      }
+
+      // Verifique se o usuário autenticado é o autor do comentário
+      if (!comment.user.equals(userId)) {
+        return res.status(403).json({
+          message: "Você não tem permissão para atualizar este comentário",
+        });
+      }
+
+      // Atualizar o texto do comentário
+      comment.text = text;
+
+      // Salvar as alterações na postagem
+      await post.save();
+
+      res
+        .status(200)
+        .json({ message: "Comentário atualizado com sucesso", post });
+    } catch (error) {
+      console.error(error);
       res
         .status(500)
-        .json({ message: "Ocorreu um erro ao adicionar o comentário" });
+        .json({ message: "Ocorreu um erro ao atualizar o comentário" });
     }
   }
 };

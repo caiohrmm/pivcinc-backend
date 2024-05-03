@@ -21,6 +21,9 @@ router.patch('/edit/:id', checkToken, imageUpload.array('images'), PostControlle
 router.post('/likepost/:id', checkToken, PostController.likePostById)
 router.post('/comment/:id', checkToken, PostController.commentToPostById)
 
+// Rota para atualizar um comentário específico
+router.patch('/posts/:postId/comments/:commentId', checkToken, PostController.updateComment);
+
 
 
 module.exports = router;
