@@ -8,6 +8,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const exceptionMessage = require("../helper/exceptions-messages");
 const getUserByToken = require("../helper/get-user-by-token");
+const Post = require("../model/Post");
 
 module.exports = class UserController {
   static async register(req, res) {
@@ -271,7 +272,7 @@ module.exports = class UserController {
     }
   }
 
-  static async unfollow(req, res) {
+  static async unfollowUser(req, res) {
     const userId = req.params.id;
     const user = await getUserByToken(getToken(req));
 
@@ -301,6 +302,57 @@ module.exports = class UserController {
       res
         .status(500)
         .json({ message: "Ocorreu um erro ao parar de seguir o usuário" });
+    }
+  }
+
+  static async postsFollowing(req, res) {
+    try {
+      // Obtenha o ID do usuário atual
+      const userToken = await getUserByToken(getToken(req));
+      const userId = userToken._id;
+  
+      // Encontre todos os usuários que têm o ID do usuário atual na lista de seguidores
+      const usersFollowingCurrentUser = await User.find({ followers: userId });
+  
+      // Obtenha os IDs desses usuários
+      const followingUserIds = usersFollowingCurrentUser.map((user) => user._id);
+  
+      // Encontre todos os posts dos usuários que o usuário atual segue
+      const followingPosts = await Post.find({
+        userId: { $in: followingUserIds },
+      }).sort({ createdAt: -1 });
+  
+      res.status(200).json(followingPosts);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: "Ocorreu um erro ao buscar os posts das pessoas que seguem você",
+      });
+    }
+  }
+  
+
+
+  static async checkIfFollowing(req, res) {
+    try {
+      const loggedUser = await getUserByToken(getToken(req));
+      const userIdToCheck = req.params.id;
+      const userCheck = await User.findById(userIdToCheck);
+
+      if (!userCheck) {
+        return exceptionMessage(res, "422", "Usuário não encontrado!");
+      }
+      if (userCheck.followers.includes(loggedUser._id)) {
+        return res
+          .status(200)
+          .json(true);
+      } else {
+        return res
+          .status(200)
+          .json(false);
+      }
+    } catch (error) {
+      exceptionMessage(res, "500", "Nada encontrado!");
     }
   }
 };

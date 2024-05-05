@@ -7,6 +7,7 @@ const { imageUpload } = require("../helper/image-upload");
 router.post("/register", UserController.register);
 router.post("/login", UserController.login);
 router.get("/checkuser", UserController.checkUser);
+router.get("/checkiffollowing/:id", checkToken, UserController.checkIfFollowing)
 router.get("/:id", UserController.getUserById);
 router.patch(
   "/edit/:id",
@@ -15,6 +16,8 @@ router.patch(
   UserController.editUserById
 );
 router.post("/follow/:id", checkToken, UserController.followUser);
-router.post("/unfollow/:id", checkToken, UserController.unfollow);
+router.post("/unfollow/:id", checkToken, UserController.unfollowUser);
+router.get("/posts/following", checkToken, UserController.postsFollowing)
+router.get("/checkiffollowing/:id", checkToken, UserController.postsFollowing)
 
 module.exports = router;

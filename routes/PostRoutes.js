@@ -23,6 +23,7 @@ router.delete('/unlikepost/:id', checkToken, PostController.unlikePostById)
 router.post('/comment/:id', checkToken, PostController.commentToPostById)
 
 
+
 // Rota para atualizar um comentário específico
 router.patch('/posts/:postId/comments/:commentId', checkToken, PostController.updateComment);
 
