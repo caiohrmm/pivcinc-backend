@@ -22,8 +22,14 @@ const User = mongoose.model(
         required: true,
       },
       image: {
-        type: String
+        type: String,
       },
+      followers: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: "User",
+        },
+      ],
     },
     { timestamps: true }
   )

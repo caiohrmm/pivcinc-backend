@@ -14,5 +14,7 @@ router.patch(
   imageUpload.single("image"),
   UserController.editUserById
 );
+router.post("/follow/:id", checkToken, UserController.followUser);
+router.post("/unfollow/:id", checkToken, UserController.unfollow);
 
 module.exports = router;

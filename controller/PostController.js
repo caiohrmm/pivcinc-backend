@@ -9,6 +9,7 @@ const bcrypt = require("bcrypt");
 const exceptionMessage = require("../helper/exceptions-messages");
 const getUserByToken = require("../helper/get-user-by-token");
 const { isValidObjectId } = require("mongoose");
+const User = require("../model/User");
 
 module.exports = class PostController {
   static async newPost(req, res) {
@@ -75,13 +76,6 @@ module.exports = class PostController {
 
     // Pegando meu usuario baseado no token.
     const currentUser = await getUserByToken(getToken(req));
-
-    const id = req.params.id;
-
-    if (!currentUser._id.equals(id)) {
-      exceptionMessage(res, 401, "Acesso Negado");
-      return;
-    }
 
     const posts = await Post.find({ userId: currentUser._id });
     // Quando preciso filtrar algum dado de um subdocument do MongoDB eu filtro por ''.
@@ -202,16 +196,16 @@ module.exports = class PostController {
       updatedData.description = description;
     }
 
-    if (!categories || !Array.isArray(categories) || categories.length === 0) {
-      exceptionMessage(
-        res,
-        422,
-        "As categorias são obrigatórias e devem ser fornecidas como um array não vazio!"
-      );
-      return;
-    } else {
-      updatedData.categories = categories;
-    }
+    // if (!categories || !Array.isArray(categories) || categories.length === 0) {
+    //   exceptionMessage(
+    //     res,
+    //     422,
+    //     "As categorias são obrigatórias e devem ser fornecidas como um array não vazio!"
+    //   );
+    //   return;
+    // } else {
+    //   updatedData.categories = categories;
+    // }
 
     if (images.length > 0) {
       updatedData.images = [];
@@ -268,6 +262,45 @@ module.exports = class PostController {
     }
   }
 
+  static async unlikePostById(req, res) {
+    try {
+      const user = await getUserByToken(getToken(req));
+
+      const postId = req.params.id;
+
+      if (!isValidObjectId(postId)) {
+        exceptionMessage(res, 422, "ID Inválido!");
+        return;
+      }
+
+      const post = await Post.findById(postId);
+
+      if (!post) {
+        exceptionMessage(res, 404, "Postagem não encontrada!");
+        return;
+      }
+
+      // Verifique se o usuário já curtiu o post
+      if (post.likes.includes(user._id)) {
+        // Se o usuário já curtiu, remova a curtida
+        post.likes.pull(user._id);
+
+        // Salve as alterações
+        await post.save();
+
+        res.status(200).json({ message: "Descurtida com sucesso", post });
+      } else {
+        // Se o usuário não curtiu, retorne uma mensagem informando que o post não foi curtido
+        res
+          .status(200)
+          .json({ message: "Post não foi curtido pelo usuário", post });
+      }
+    } catch (error) {
+      console.error(error);
+      exceptionMessage(res, 422, "Ocorreu um erro ao descurtir o post!");
+    }
+  }
+
   static async commentToPostById(req, res) {
     try {
       const { text } = req.body;
@@ -302,7 +335,6 @@ module.exports = class PostController {
 
   static async updateComment(req, res) {
     try {
-
       // Recuperando o id da postagem do parametro da requisicao
       const postId = req.params.postId;
 
@@ -354,4 +386,6 @@ module.exports = class PostController {
         .json({ message: "Ocorreu um erro ao atualizar o comentário" });
     }
   }
+
+  
 };

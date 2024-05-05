@@ -233,4 +233,74 @@ module.exports = class UserController {
       return;
     }
   }
+
+  static async followUser(req, res) {
+    const userId = req.params.id;
+    const user = await getUserByToken(getToken(req));
+
+    try {
+      // Encontre o usuário a ser seguido
+      const userToFollow = await User.findById(userId);
+      if (!userToFollow) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+
+      if (userId.toString() === user._id.toString()) {
+        return res
+          .status(401)
+          .json({ message: "Você não pode seguir você mesmo!" });
+      }
+
+      // Verifique se o usuário já está sendo seguido
+      if (userToFollow.followers.includes(user._id)) {
+        return res
+          .status(400)
+          .json({ message: "Você já está seguindo este usuário" });
+      }
+
+      // Adicione o seguidor ao usuário
+      userToFollow.followers.push(user._id);
+      await userToFollow.save();
+
+      res
+        .status(200)
+        .json({ message: "Agora você está seguindo este usuário" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Ocorreu um erro ao seguir o usuário" });
+    }
+  }
+
+  static async unfollow(req, res) {
+    const userId = req.params.id;
+    const user = await getUserByToken(getToken(req));
+
+    try {
+      // Encontre o usuário a ser seguido
+      const userToUnfollow = await User.findById(userId);
+      if (!userToUnfollow) {
+        return res.status(404).json({ message: "Usuário não encontrado" });
+      }
+
+      // Verifique se o usuário já está sendo seguido
+      if (!userToUnfollow.followers.includes(user._id)) {
+        return res
+          .status(400)
+          .json({ message: "Você não está seguindo este usuário" });
+      }
+
+      // Adicione o seguidor ao usuário
+
+      await User.findByIdAndUpdate(userId, { $pull: { followers: user._id } });
+
+      res
+        .status(200)
+        .json({ message: "Agora você não segue mais este usuário" });
+    } catch (error) {
+      console.error(error);
+      res
+        .status(500)
+        .json({ message: "Ocorreu um erro ao parar de seguir o usuário" });
+    }
+  }
 };
