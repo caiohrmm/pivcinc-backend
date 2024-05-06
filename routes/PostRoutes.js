@@ -21,6 +21,7 @@ router.patch('/edit/:id', checkToken, imageUpload.array('images'), PostControlle
 router.post('/likepost/:id', checkToken, PostController.likePostById)
 router.delete('/unlikepost/:id', checkToken, PostController.unlikePostById)
 router.post('/comment/:id', checkToken, PostController.commentToPostById)
+router.get("/comments/:id", checkToken, PostController.viewAllComments)
 
 
 

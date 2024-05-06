@@ -20,4 +20,5 @@ router.post("/unfollow/:id", checkToken, UserController.unfollowUser);
 router.get("/posts/following", checkToken, UserController.postsFollowing)
 router.get("/checkiffollowing/:id", checkToken, UserController.postsFollowing)
 
+
 module.exports = router;

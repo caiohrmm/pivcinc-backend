@@ -324,12 +324,10 @@ module.exports = class PostController {
       // Salve as alterações
       await post.save();
 
-      res
-        .status(201)
-        .json({ message: "Comentário adicionado com sucesso", post });
+      res.status(201).json({ message: "Comentário adicionado com sucesso" });
     } catch (error) {
       console.error(error);
-      exceptionMessage(res, 422, "Ocorreu um erro ao atualizar o comentário!");
+      exceptionMessage(res, 422, "Ocorreu um erro ao adicionar o comentário!");
     }
   }
 
@@ -387,6 +385,28 @@ module.exports = class PostController {
     }
   }
 
-  
-  
+  static async viewAllComments(req, res) {
+    try {
+      const id = req.params.id;
+
+      if (!isValidObjectId(id)) {
+        exceptionMessage(res, 422, "ID Inválido!");
+        return;
+      }
+
+      const post = await Post.findById(id);
+
+      
+
+      if (!post) {
+        exceptionMessage(res, 404, "Nenhuma postagem encontrada!");
+        return;
+      } else {
+        const postComments = post.comments
+        res.status(200).json({ postComments });
+      }
+    } catch (error) {
+      exceptionMessage(res, 422, "ID de postagem inválido!");
+    }
+  }
 };
