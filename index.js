@@ -24,4 +24,4 @@ const PostRoutes = require("./routes/PostRoutes")
 app.use('/users', UserRoutes)
 app.use('/posts', PostRoutes)
 
-app.listen(4000)
+app.listen(4173)
