@@ -21,7 +21,7 @@ Clone este repositório e instale as dependências:
 
 ```sh
 $ git clone https://github.com/caiohrmm/pivcinc-backend.git
-$ cd pivcinc
+$ cd pivcinc-backend
 $ npm install
 ```
 
@@ -57,15 +57,17 @@ A API utiliza JWT para autenticação. O fluxo de login e registro funciona assi
 ### 🔹 Registro de Usuário
 
 ```ghi
-POST /api/auth/register
+POST /users/register
 ```
 **Corpo da requisição:**
 
 ```json
 {
-  "name": "Nome do Usuário",
-  "email": "usuario@email.com",
-  "password": "senha123"
+    "name": "Exemplo",
+    "email": "exemplo@gmail.com",
+    "password": "123",
+    "confirmPassword": "123",
+    "phone": "123"
 }
 ```
 
@@ -81,14 +83,14 @@ POST /api/auth/register
 ### 🔹 Login de Usuário
 
 ```ghi
-POST /api/auth/login
+POST /users/login
 ```
 **Corpo da requisição:**
 
 ```json
 {
-  "email": "usuario@email.com",
-  "password": "senha123"
+  "email": "exemplo@email.com",
+  "password": "123"
 }
 ```
 
