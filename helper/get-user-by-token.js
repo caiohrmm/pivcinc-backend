@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-
+require("dotenv").config();
 const User = require("../model/User");
 
 // Essa funcao será responsavel por pegar um usuário pelo jwt token e nao pelo ID, para ficar mais seguro
@@ -10,7 +10,7 @@ const getUserByToken = async (token) => {
   }
 
   // Preciso do token do usuário para acessá-lo, no token eu tenho o id, entao pego ele por lá!
-  const decoded = jwt.verify(token, "secretpicinco");
+  const decoded = jwt.verify(token, `${process.env.SECRET_JWT}`);
 
   const _id = decoded.id;
 

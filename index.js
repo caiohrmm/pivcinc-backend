@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+require("dotenv").config();
 
 const app = express();
 
@@ -24,4 +25,4 @@ const PostRoutes = require("./routes/PostRoutes")
 app.use('/users', UserRoutes)
 app.use('/posts', PostRoutes)
 
-app.listen(4173)
+app.listen(process.env.PORT)
