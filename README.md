@@ -47,7 +47,7 @@ API_PORT=3000
 No arquivo **package.json** em scripts, altere o script start para sua API_PORT
 
 ```def
-"start": "nodemon ./index.js localhost SUA_API_PORT "
+"start": "nodemon ./index.js localhost SUA_API_PORT"
 ```
 
 ---
