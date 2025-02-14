@@ -41,7 +41,13 @@ Crie um arquivo `.env` na raiz do projeto e adicione as seguintes variáveis de 
 ```def
 MONGO_URI=seu_banco_de_dados
 JWT_SECRET=sua_chave_secreta
-PORT=3000
+API_PORT=3000
+```
+
+No arquivo **package.json** em scripts, altere o script start para sua API_PORT
+
+```def
+"start": "nodemon ./index.js localhost SUA_API_PORT "
 ```
 
 ---
