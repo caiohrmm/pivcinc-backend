@@ -1,6 +1,7 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-require("dotenv").config();
+
 
 const app = express();
 
@@ -16,13 +17,13 @@ app.use(
 );
 
 // Configurando a pasta public
-app.use(express.static('public'))
+app.use(express.static("public"));
 
 // Configurando rotas
-const UserRoutes = require("./routes/UserRoutes")
-const PostRoutes = require("./routes/PostRoutes")
+const UserRoutes = require("./routes/UserRoutes");
+const PostRoutes = require("./routes/PostRoutes");
 
-app.use('/users', UserRoutes)
-app.use('/posts', PostRoutes)
+app.use("/users", UserRoutes);  
+app.use("/posts", PostRoutes);
 
-app.listen(process.env.PORT)
+app.listen(process.env.API_PORT);
